@@ -107,7 +107,7 @@
   <body>
     <div class="card">
       <h1>Ввод данных</h1>
-      <p>Введи текст — он уйдёт в бота и появится в логах бота.</p>
+      <p>Введи текст — он уйдёт в бота и появится в логах.</p>
 
       <label for="note">Текст от пользователя:</label>
       <input
@@ -179,7 +179,7 @@
             tg.sendData(JSON.stringify(payload));
 
             statusEl.textContent =
-              "✅ Данные отправлены. Смотри ответ бота и логи.";
+              "✅ Данные отправлены. Смотри ответ бота и записи в лог-чате.";
             statusEl.classList.remove("status--error");
             statusEl.classList.add("status--ok");
 
@@ -187,8 +187,8 @@
               tg.HapticFeedback.impactOccurred("light");
             }
 
-            // Не обязательно, но можно закрыть WebApp после отправки
-            // tg.close();
+            // ВАЖНО:
+            // tg.close() НЕ вызываем — но Telegram всё равно закроет Mini App сам после sendData.
           } catch (e) {
             statusEl.textContent =
               "❌ Ошибка при отправке данных в бота: " + String(e);
