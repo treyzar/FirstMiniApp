@@ -142,11 +142,13 @@
         if (hasTelegram) {
           tg = window.Telegram.WebApp;
           tg.ready();
-          tg.MainButton.setText("Отправить данные");
-          tg.MainButton.show();
           tg.expand();
 
-          // 👇 Добавим явный маркер, что мы в среде Telegram WebApp
+          if (tg.MainButton) {
+            tg.MainButton.setText("Отправить данные");
+            tg.MainButton.show();
+          }
+
           statusEl.textContent = "✅ WebApp окружение найдено.";
           statusEl.classList.add("status--ok");
         } else {
@@ -167,6 +169,7 @@
           if (!tg) {
             statusEl.textContent =
               "Страница не в Telegram WebApp, данные в бота не уйдут.";
+            statusEl.classList.remove("status--ok");
             statusEl.classList.add("status--error");
             return;
           }
@@ -174,10 +177,18 @@
           try {
             console.log("SEND DATA PAYLOAD:", payload);
             tg.sendData(JSON.stringify(payload));
+
             statusEl.textContent =
-              "✅ Данные отправлены. Смотри логи бота и его ответ.";
+              "✅ Данные отправлены. Смотри ответ бота и логи.";
             statusEl.classList.remove("status--error");
             statusEl.classList.add("status--ok");
+
+            if (tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+              tg.HapticFeedback.impactOccurred("light");
+            }
+
+            // Не обязательно, но можно закрыть WebApp после отправки
+            // tg.close();
           } catch (e) {
             statusEl.textContent =
               "❌ Ошибка при отправке данных в бота: " + String(e);
@@ -189,7 +200,7 @@
 
         sendBtn.addEventListener("click", handleSend);
 
-        if (tg) {
+        if (tg && tg.MainButton) {
           tg.MainButton.onClick(handleSend);
         }
       })();
