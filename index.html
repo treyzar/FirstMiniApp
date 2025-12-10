@@ -1,92 +1,366 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>My Mini App</title>
+    <title>Telegram Mini App Debug</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Обязательный скрипт Telegram WebApp -->
+
+    <!-- Обязательный скрипт Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        background: #111827;
-        color: #f9fafb;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        padding: 16px;
+      * {
         box-sizing: border-box;
       }
 
-      h1 {
-        font-size: 24px;
-        margin-bottom: 8px;
-      }
-
-      p {
-        margin-bottom: 16px;
-        opacity: 0.9;
-      }
-
-      button {
-        border: none;
-        border-radius: 999px;
-        padding: 12px 20px;
-        font-size: 16px;
-        cursor: pointer;
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #020617;
+        color: #e5e7eb;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
 
       .card {
-        background: rgba(15, 23, 42, 0.9);
+        background: rgba(15, 23, 42, 0.96);
         border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        padding: 16px 18px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
         margin-bottom: 16px;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin: 0 0 8px 0;
+      }
+
+      h2 {
+        font-size: 16px;
+        margin: 16px 0 8px 0;
+      }
+
+      p {
+        margin: 0 0 10px 0;
+        opacity: 0.9;
+      }
+
+      .user-line {
+        margin-top: 6px;
+        font-weight: 500;
+      }
+
+      .input-group {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      label {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      input,
+      textarea {
+        border-radius: 12px;
+        border: 1px solid #374151;
+        padding: 8px 12px;
+        background: #020617;
+        color: #e5e7eb;
+        outline: none;
+        font-size: 14px;
+        resize: vertical;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: #f97316;
+        box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
+      }
+
+      .hint {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-top: 4px;
+      }
+
+      .status {
+        font-size: 13px;
+        margin-top: 8px;
+        opacity: 0.8;
+      }
+
+      .status--ok {
+        color: #22c55e;
+      }
+
+      .status--error {
+        color: #f97316;
+      }
+
+      .preview {
+        margin-top: 8px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #020617;
+        border: 1px dashed #4b5563;
+        max-height: 220px;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 11px;
+        line-height: 1.4;
+        white-space: pre;
+      }
+
+      .footer {
+        margin-top: auto;
+        font-size: 12px;
+        opacity: 0.55;
+        text-align: center;
+      }
+
+      .native-button {
+        margin-top: 12px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: none;
+        background: #f97316;
+        color: #0b1120;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .native-button:active {
+        transform: translateY(1px);
+        filter: brightness(0.95);
+      }
+
+      .native-button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      @media (min-width: 768px) {
+        .row {
+          flex-direction: row;
+        }
+
+        .row > .col {
+          flex: 1;
+        }
       }
     </style>
   </head>
   <body>
     <div class="card">
-      <h1>Моё мини-приложение</h1>
-      <p id="user"></p>
-      <p>Нажми кнопку, чтобы отправить данные боту.</p>
+      <h1>Mini App · Полный дамп данных</h1>
+      <p class="user-line" id="user-line"></p>
+      <p>
+        Это тестовое мини-приложение. Оно собирает максимум данных из
+        <code>Telegram.WebApp</code> и отправляет их в бота через
+        <code>sendData</code>, чтобы ты видел, с чем можешь работать.
+      </p>
+
+      <div class="input-group">
+        <label for="note">Твой комментарий (для проверки формы):</label>
+        <input
+          id="note"
+          type="text"
+          autocomplete="off"
+          placeholder="Например: хочу тестовое задание или номер заказа"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="extra">Дополнительные данные (JSON, необязательно):</label>
+        <textarea
+          id="extra"
+          rows="3"
+          placeholder='Например: {"priority": "high", "tags": ["test", "debug"]}'
+        ></textarea>
+        <p class="hint">
+          Если здесь корректный JSON — он попадёт в поле
+          <code>custom.extra</code> в payload.
+        </p>
+      </div>
+
+      <div class="row" style="margin-top: 12px">
+        <div class="col">
+          <button class="native-button" id="send-btn">
+            Отправить все данные боту
+          </button>
+          <p class="hint">
+            Эта кнопка дублирует нажатие на MainButton Telegram.
+          </p>
+          <p class="status" id="status"></p>
+        </div>
+      </div>
+
+      <h2>Предпросмотр payload</h2>
+      <div class="preview" id="preview"></div>
+    </div>
+
+    <div class="footer">
+      Telegram WebApp Debug · открой через кнопку бота, а не напрямую в
+      браузере.
     </div>
 
     <script>
-      const tg = window.Telegram.WebApp;
+      (function () {
+        // Проверяем, есть ли Telegram.WebApp
+        if (
+          !window.Telegram ||
+          !window.Telegram.WebApp ||
+          typeof window.Telegram.WebApp.ready !== "function"
+        ) {
+          const status = document.getElementById("status");
+          status.textContent =
+            "❌ Telegram.WebApp недоступен. Открой страницу через кнопку бота в Telegram, а не в обычном браузере.";
+          status.classList.add("status--error");
+          const sendBtn = document.getElementById("send-btn");
+          sendBtn.disabled = true;
+          return;
+        }
 
-      // Инициализация
-      tg.ready();
+        const tg = window.Telegram.WebApp;
+        const statusEl = document.getElementById("status");
+        const previewEl = document.getElementById("preview");
+        const sendBtn = document.getElementById("send-btn");
+        const userLine = document.getElementById("user-line");
+        const noteInput = document.getElementById("note");
+        const extraInput = document.getElementById("extra");
 
-      // Настраиваем фон и тему под Telegram
-      document.body.style.backgroundColor = tg.backgroundColor ?? "#111827";
+        // Сообщаем Telegram, что всё готово
+        tg.ready();
 
-      // Показываем информацию о пользователе (если есть)
-      const userEl = document.getElementById("user");
-      if (tg.initDataUnsafe?.user) {
-        const u = tg.initDataUnsafe.user;
-        userEl.textContent = `Привет, ${u.first_name}${
-          u.last_name ? " " + u.last_name : ""
-        }!`;
-      } else {
-        userEl.textContent = "Привет! (я не вижу данные пользователя)";
-      }
+        // Стараемся подстроиться под тему Telegram
+        if (tg.themeParams && tg.themeParams.bg_color) {
+          document.body.style.backgroundColor = tg.themeParams.bg_color;
+        }
 
-      // Настраиваем основную кнопку Telegram (MainButton)
-      tg.MainButton.setText("Отправить данные боту");
-      tg.MainButton.show();
+        // Показать пользователя, если он есть
+        const unsafe = tg.initDataUnsafe || {};
+        const u = unsafe.user;
+        if (u) {
+          const fullName = [u.first_name, u.last_name]
+            .filter(Boolean)
+            .join(" ");
+          const username = u.username ? " (@" + u.username + ")" : "";
+          userLine.textContent =
+            "Привет, " + fullName + username + "! Данные WebApp загружены.";
+        } else {
+          userLine.textContent =
+            "Привет! Я не вижу данных пользователя в initDataUnsafe.user.";
+        }
 
-      tg.MainButton.onClick(() => {
-        // Эти данные прилетят твоему боту
-        tg.sendData(
-          JSON.stringify({
-            action: "confirm",
-            timestamp: Date.now(),
-          })
-        );
-      });
+        // Настраиваем MainButton Telegram
+        tg.MainButton.setText("Отправить все данные боту");
+        tg.MainButton.show();
+
+        // Функция сборки payload — тут максимально всё, что можно вытащить
+        function buildPayload() {
+          let extraParsed = null;
+          const extraRaw = extraInput.value.trim();
+
+          if (extraRaw) {
+            try {
+              extraParsed = JSON.parse(extraRaw);
+            } catch (e) {
+              extraParsed = {
+                parse_error: String(e),
+                raw: extraRaw,
+              };
+            }
+          }
+
+          const payload = {
+            type: "full_dump",
+            debug: {
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent,
+              language: navigator.language || null,
+              languages: navigator.languages || null,
+            },
+            webApp: {
+              version: tg.version,
+              platform: tg.platform,
+              colorScheme: tg.colorScheme,
+              themeParams: tg.themeParams || null,
+              isExpanded: tg.isExpanded,
+              viewportHeight: tg.viewportHeight,
+              viewportStableHeight: tg.viewportStableHeight,
+              headerColor: tg.headerColor,
+              backgroundColor: tg.backgroundColor,
+              isClosingConfirmationEnabled: tg.isClosingConfirmationEnabled,
+            },
+            initData: tg.initData || null,
+            initDataUnsafe: tg.initDataUnsafe || null,
+            custom: {
+              note: noteInput.value || "",
+              extra: extraParsed,
+            },
+          };
+
+          return payload;
+        }
+
+        function updatePreview() {
+          const payload = buildPayload();
+          const text = JSON.stringify(payload, null, 2);
+          previewEl.textContent = text;
+        }
+
+        // Обновляем предпросмотр при изменении полей
+        noteInput.addEventListener("input", updatePreview);
+        extraInput.addEventListener("input", updatePreview);
+
+        // Отправка данных в бота
+        function sendDataToBot() {
+          const payload = buildPayload();
+          const text = JSON.stringify(payload);
+
+          try {
+            tg.sendData(text);
+            statusEl.textContent =
+              "✅ Данные отправлены в бота. Смотри ответ в чате.";
+            statusEl.classList.remove("status--error");
+            statusEl.classList.add("status--ok");
+          } catch (e) {
+            statusEl.textContent =
+              "❌ Ошибка при отправке данных в бота: " + String(e);
+            statusEl.classList.remove("status--ok");
+            statusEl.classList.add("status--error");
+            console.error("sendData error:", e);
+          }
+        }
+
+        // Клик по MainButton Telegram
+        tg.MainButton.onClick(sendDataToBot);
+
+        // Клик по нативной кнопке (для удобства, чтобы не тянуться до MainButton)
+        sendBtn.addEventListener("click", function () {
+          sendDataToBot();
+        });
+
+        // Максимально разворачиваем WebView
+        tg.expand();
+
+        // Инициализируем предпросмотр при первом запуске
+        updatePreview();
+      })();
     </script>
   </body>
 </html>
